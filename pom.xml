@@ -148,31 +148,21 @@
       <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
       <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-      <!-- maven-compiler-plugin -->
-      <maven.compiler.target>1.8</maven.compiler.target>
-      <maven.compiler.source>1.8</maven.compiler.source>
-      <maven.compiler.testTarget>${maven.compiler.target}</maven.compiler.testTarget>
-      <maven.compiler.testSource>${maven.compiler.source}</maven.compiler.testSource>
-
-      <!--
-          Options to override the compiler arguments directly on the compiler argument line to separate between what
-          the IDE understands as the source level and what the Maven compiler actually use.
-      -->
-      <maven.compiler.argument.target>${maven.compiler.target}</maven.compiler.argument.target>
-      <maven.compiler.argument.source>${maven.compiler.source}</maven.compiler.argument.source>
-      <maven.compiler.argument.testTarget>${maven.compiler.testTarget}</maven.compiler.argument.testTarget>
-      <maven.compiler.argument.testSource>${maven.compiler.testSource}</maven.compiler.argument.testSource>
+      <!-- maven-compiler-plugin all version options are in the profile section -->
+      <!-- If running JDK8 the source/target option is in use. If running JDK9 or later the release option is in use -->
+      <!-- In both cases the default is currently JDK 8 -->
+      <jboss.jdk.target>8</jboss.jdk.target>
 
       <!-- maven-enforcer-plugin -->
       <maven.min.version>3.2.5</maven.min.version>
-      <jdk.min.version>${maven.compiler.argument.source}</jdk.min.version>
+      <jdk.min.version>${jboss.jdk.target}</jdk.min.version>
       <insecure.repositories>ERROR</insecure.repositories>
 
       <!-- maven-idea-plugin & maven-eclipse-plugin -->
       <downloadSources>true</downloadSources>
 
       <!-- maven-pmd-plugin -->
-      <targetJdk>${maven.compiler.argument.target}</targetJdk>
+      <targetJdk>${jboss.jdk.target}</targetJdk>
 
       <!-- maven-release-plugin -->
       <useReleaseProfile>false</useReleaseProfile>
@@ -890,6 +880,84 @@
           </plugins>
         </build>
       </profile>
+
+        <profile>
+          <id>compile-jdk8</id>
+          <activation>
+            <jdk>8</jdk>
+          </activation>
+          <properties>
+             <!-- maven-compiler-plugin -->
+             <maven.compiler.target>${jboss.jdk.target}</maven.compiler.target>
+             <maven.compiler.source>${jboss.jdk.target}</maven.compiler.source>
+             <maven.compiler.testTarget>${maven.compiler.target}</maven.compiler.testTarget>
+             <maven.compiler.testSource>${maven.compiler.source}</maven.compiler.testSource>
+             <!--
+              Options to override the compiler arguments directly on the compiler argument line to separate between what
+              the IDE understands as the source level and what the Maven compiler actually use.
+             -->
+             <maven.compiler.argument.target>${maven.compiler.target}</maven.compiler.argument.target>
+             <maven.compiler.argument.source>${maven.compiler.source}</maven.compiler.argument.source>
+             <maven.compiler.argument.testTarget>${maven.compiler.testTarget}</maven.compiler.argument.testTarget>
+             <maven.compiler.argument.testSource>${maven.compiler.testSource}</maven.compiler.argument.testSource>
+          </properties>
+	  <build>
+            <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>${version.compiler.plugin}</version>
+            <configuration>
+              <showDeprecation>true</showDeprecation>
+              <showWarnings>true</showWarnings>
+              <source>${maven.compiler.argument.source}</source>
+              <target>${maven.compiler.argument.target}</target>
+              <testSource>${maven.compiler.argument.testSource}</testSource>
+              <testTarget>${maven.compiler.argument.testTarget}</testTarget>
+              <compilerArgs>
+                <arg>-Xlint:unchecked</arg>
+              </compilerArgs>
+            </configuration>
+            </plugin>
+           </plugins>
+          </build>
+        </profile>
+
+	<profile>
+          <id>compile-jdk9on</id>
+          <activation>
+            <jdk>[9,)</jdk>
+          </activation>
+          <properties>
+             <!-- maven-compiler-plugin -->
+             <maven.compiler.release>${jboss.jdk.target}</maven.compiler.release>
+             <maven.compiler.testRelease>${maven.compiler.release}</maven.compiler.testRelease>
+             <!--
+              Options to override the compiler arguments directly on the compiler argument line to separate between what
+              the IDE understands as the source level and what the Maven compiler actually use.
+             -->
+             <maven.compiler.argument.release>${maven.compiler.release}</maven.compiler.argument.release>
+             <maven.compiler.argument.testRelease>${maven.compiler.testRelease}</maven.compiler.argument.testRelease>
+          </properties>
+          <build>
+            <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-compiler-plugin</artifactId>
+            <version>${version.compiler.plugin}</version>
+            <configuration>
+              <showDeprecation>true</showDeprecation>
+	      <showWarnings>true</showWarnings>
+	      <release>${maven.compiler.argument.release}</release>
+	      <testRelease>${maven.compiler.argument.testRelease}</testRelease>
+              <compilerArgs>
+                <arg>-Xlint:unchecked</arg>
+              </compilerArgs>
+            </configuration>
+            </plugin>
+           </plugins>
+          </build>
+        </profile>
 
         <profile>
           <id>compile-java8-release-flag</id>
